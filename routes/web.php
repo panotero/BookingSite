@@ -46,28 +46,17 @@ Route::middleware(['auth', 'check.status', 'prevent-back-history'])->group(funct
         ];
     });
 
+    //page routes
     Route::get('/page_dashboard', [PageController::class, 'page_dashboard']);
     Route::get('/page_usermanagement', [PageController::class, 'page_UserManagement']);
     Route::get('/page_menus', [PageController::class, 'page_Menus']);
     Route::get('/page_users', [PageController::class, 'page_Users']);
     Route::get('/page_settings', [PageController::class, 'page_settings']);
-    Route::get('/page_maintenance', [PageController::class, 'page_Maintenance']);
-    Route::get('/page_bookings', [PageController::class, 'page_bookings']);
-    Route::get('/page_shipperConsignee', [PageController::class, 'page_shipperConsignee']);
-    Route::get('/page_contracts', [PageController::class, 'page_contracts']);
-    Route::get('/page_reports', [PageController::class, 'page_reports']);
-
-
-
-    Route::get('/profile', [PageController::class, 'profile'])->name('profile');
-    Route::get('/settings', [PageController::class, 'settings'])->name('settings');
-    Route::get('/page_lookupValues', [PageController::class, 'page_lookupValues']);
-
-
-    Route::get('/testmail', [MailerController::class, 'test']);
-
-
     Route::get('/page_mailer', [PageController::class, 'page_Mailer']);
+    Route::get('/page_hotelManagement', [PageController::class, 'page_hotelManagement']);
+
+    //mailer routes
+    Route::get('/testmail', [MailerController::class, 'test']);
     Route::post('/mailer_save', [MailerController::class, 'save'])->name('mailer_save');
     Route::post('/mailer/send', [MailerController::class, 'send'])->name('mailer.send');
 

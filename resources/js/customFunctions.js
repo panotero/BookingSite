@@ -152,3 +152,13 @@ window.renderRows = function renderRows(
 
   initDataTables(10);
 };
+
+window.clearInputs = function clearInputs() {
+  document.querySelectorAll("input").forEach((input) => {
+    input.value = "";
+  });
+
+  document.querySelectorAll("select").forEach((input) => {
+    input.value = "";
+  });
+};
