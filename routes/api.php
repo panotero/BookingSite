@@ -10,6 +10,7 @@ use App\Http\Controllers\MenusController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\HotelController;
+use App\Http\Controllers\RoomController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,8 +56,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications/stream', [NotificationController::class, 'stream']);
 
     //hotel management functions
-    Route::post('/hotels/complete', [HotelController::class, 'storeCompleteHotel']);
-    Route::get('/hotels/all', [HotelController::class, 'getAllHotels']);
+    Route::prefix('hotels')->group(function () {
+        Route::post('/complete', [HotelController::class, 'storeCompleteHotel']);
+        Route::get('/all', [HotelController::class, 'getAllHotels']);
+        Route::delete('/delete/{id}', [HotelController::class, 'deleteHotel']);
+        Route::get('/rooms/{id}', [RoomController::class, 'getRoomByHotel']);
+        Route::delete('/room/delete/{id}', [RoomController::class, 'deleteRoomByHotel']);
+        Route::post('/room/add', [RoomController::class, 'addNewRoom']);
+    });
+
+    //hotel rooms
+    Route::prefix('room')->group(function () {
+        Route::get('/{id}', [RoomController::class, 'getRoom']);
+        Route::delete('/{id}', [RoomController::class, 'deleteRoom']);
+    });
 
 
 

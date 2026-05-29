@@ -24,3 +24,4 @@ import "./navmenu";
 // import "./notificationController";
 import "./mailer";
 import "./toast";
+import "./hotelFunction";

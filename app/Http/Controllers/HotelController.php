@@ -234,4 +234,25 @@ class HotelController extends Controller
             'data' => $hotels
         ]);
     }
+
+    public function deleteHotel($id, Request $request)
+    {
+        // dd($request->all());
+        try {
+            DB::beginTransaction();
+            //put the db transaction here
+            $response = Hotel::where('id', $request->id)->delete();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => $response
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e
+            ]);
+        }
+    }
 }
