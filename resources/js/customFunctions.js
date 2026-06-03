@@ -155,10 +155,12 @@ window.renderRows = function renderRows(
 
 window.clearInputs = function clearInputs() {
   document.querySelectorAll("input").forEach((input) => {
+    if (input.hasAttribute("disabled")) return;
     input.value = "";
   });
 
   document.querySelectorAll("select").forEach((input) => {
+    if (input.hasAttribute("disabled")) return;
     input.value = "";
   });
 };

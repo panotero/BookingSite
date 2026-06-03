@@ -1,0 +1,93 @@
+<!-- Sticky Navbar -->
+<header class="sticky top-0 z-50 bg-cream/60 backdrop-blur-md border-b border-paper shadow-sm">
+
+    <!-- Logo -->
+    <div class="container mx-auto">
+        <div class=" mx-auto flex justify-between  max-md:justify-center py-6">
+
+            <div class="flex gap-3 max-md:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1
+             0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+
+                    <polyline points="22,6 12,13 2,6"></polyline>
+
+                </svg>
+                email.com.ph
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-olive-600">LUXESTAY</h1>
+                {{-- <img src="logo.png" alt="Logo" class="h-12 my-auto"> --}}
+            </div>
+            <div class="flex gap-3  max-md:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2
+             19.79 19.79 0 0 1-8.63-3.07
+             19.5 19.5 0 0 1-6-6
+             A19.79 19.79 0 0 1 2.11 4.18
+             2 2 0 0 1 4.11 2h3
+             a2 2 0 0 1 2 1.72
+             c.13.98.37 1.94.72 2.86
+             a2 2 0 0 1-.45 2.11L9.1 9.9
+             a16 16 0 0 0 6 6l1.21-1.21
+             a2 2 0 0 1 2.11-.45
+             c.92.35 1.88.59 2.86.72
+             A2 2 0 0 1 22 16.92z" />
+                </svg>
+                091234567890
+            </div>
+        </div>
+    </div>
+    <nav class="sticky top-0 z-50 bg-olive-700 border-b border-olive-600">
+
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+
+
+            <!-- Mobile button -->
+            <button id="nav-toggle" class="lg:hidden text-cream text-2xl">
+                ☰
+            </button>
+
+            <!-- Nav Links -->
+            <ul id="nav-menu"
+                class="
+                hidden
+                lg:flex
+                gap-8
+                text-cream
+                font-medium
+                absolute lg:static
+                top-full left-0
+                w-full lg:w-auto
+                bg-olive-700 lg:bg-transparent
+                border-t lg:border-none
+                border-olive-600
+                p-6 lg:p-0 mx-auto duration-500
+            ">
+
+                <li><a href="home" class="block py-2 lg:py-0 hover:text-olive-200 transition">Home</a></li>
+                <li><a href="hotels" class="block py-2 lg:py-0 hover:text-olive-200 transition">Hotels</a></li>
+                <li><a href="contactus" class="block py-2 lg:py-0 hover:text-olive-200 transition">Contact Us</a></li>
+                <li><a href="aboutus" class="block py-2 lg:py-0 hover:text-olive-200 transition">About</a></li>
+
+            </ul>
+
+        </div>
+
+    </nav>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const navToggle = document.getElementById("nav-toggle");
+            const navMenu = document.getElementById("nav-menu");
+
+            navToggle.addEventListener("click", () => {
+                navMenu.classList.toggle("hidden");
+            });
+        });
+    </script>
+
+</header>

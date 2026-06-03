@@ -9,6 +9,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\MailerController;
 use App\Http\Middleware\CheckUserStatus;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\HotelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,8 @@ Route::get('/login', function () {
 Route::get('/', function () {
     return redirect()->route('login');
 });
+Route::get('/home', [HotelController::class, 'home']);
+Route::get('/hotel', [HotelController::class, 'hotel']);
 
 
 Route::middleware(['auth', 'check.status', 'prevent-back-history'])->group(function () {

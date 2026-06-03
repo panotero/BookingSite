@@ -31,4 +31,8 @@ class Hotel extends Model
     {
         return $this->hasMany(HotelReview::class, 'hotel_id');
     }
+    public function forms()
+    {
+        return $this->hasOne(HotelForm::class, 'hotel_id');
+    }
 }

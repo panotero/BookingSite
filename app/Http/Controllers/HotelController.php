@@ -10,6 +10,7 @@ use App\Services\FileUploadService;
 use Illuminate\Support\Facades\DB;
 use App\Models\Room;
 use App\Models\Price;
+use App\Models\HotelForm;
 
 class HotelController extends Controller
 {
@@ -20,11 +21,14 @@ class HotelController extends Controller
     {
         $this->fileUploadService = $fileUploadService;
     }
-    public function index()
+    public function index() {}
+    public function home()
     {
-        return response()->json(
-            Hotel::with(['rooms.prices', 'reviews'])->latest()->get()
-        );
+        return view('clients.home');
+    }
+    public function hotel()
+    {
+        return view('clients.hotel');
     }
 
     public function store(Request $request)
@@ -132,6 +136,11 @@ class HotelController extends Controller
                 'photos' => $hotelPhotos,
             ]);
 
+            $externalFormUrl = HotelForm::create([
+                'hotel_id' => $hotel->id,
+                'form_url' => $hotelData['external_form_url']
+            ]);
+
 
 
             // =====================================================
@@ -226,12 +235,26 @@ class HotelController extends Controller
     {
         $hotels = Hotel::with([
             'rooms.prices',
-            'reviews'
+            'reviews',
+            'forms'
         ])->latest()->get();
 
         return response()->json([
             'success' => true,
             'data' => $hotels
+        ]);
+    }
+    public function getHotel($id, Request $request)
+    {
+        $hotel = Hotel::with([
+            'rooms.prices',
+            'reviews',
+            'forms'
+        ])->where('id', $id)->first();
+
+        return response()->json([
+            'success' => true,
+            'data' => $hotel
         ]);
     }
 

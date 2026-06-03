@@ -65,15 +65,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/room/add', [RoomController::class, 'addNewRoom']);
     });
 
+
     //hotel rooms
     Route::prefix('room')->group(function () {
         Route::get('/{id}', [RoomController::class, 'getRoom']);
         Route::delete('/{id}', [RoomController::class, 'deleteRoom']);
     });
-
-
-
-
 
 
     Route::prefix('users')->group(function () {
@@ -113,3 +110,5 @@ Route::middleware(['auth'])->group(function () {
         ]);
     });
 });
+Route::get('/allHotels', [HotelController::class, 'getAllHotels']);
+Route::get('/hotel/{id}', [HotelController::class, 'getHotel']);

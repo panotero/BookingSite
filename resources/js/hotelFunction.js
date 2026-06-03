@@ -3,14 +3,14 @@ window.initHotelFunction = function initHotelFunction() {
     .getElementById("openHotelModal")
     .addEventListener("click", function () {
       initModal({
-        modalId: "DocumentModal",
+        modalId: "HotelModal",
       });
     });
 
   let roomIndex = 0;
   $("#addRoomNewBtn").on("click", function () {
     initModal({
-      modalId: "AddRoomModal",
+      modalId: "RoomModal",
     });
   });
 
@@ -42,7 +42,7 @@ window.initHotelFunction = function initHotelFunction() {
 
                     <input type="text"
                         class="room_name w-full border rounded-xl px-4 py-3 mt-1"
-                        placeholder="Deluxe Ocean View">
+                        placeholder="Deluxe Ocean View" required>
                 </div>
 
                 <div>
@@ -52,7 +52,7 @@ window.initHotelFunction = function initHotelFunction() {
 
                     <input type="text"
                         class="room_area w-full border rounded-xl px-4 py-3 mt-1"
-                        placeholder="45 sqm">
+                        placeholder="45 sqm" required>
                 </div>
 
             </div>
@@ -68,17 +68,17 @@ window.initHotelFunction = function initHotelFunction() {
 
                     <input type="number"
                         class="guest_capacity w-full border rounded-xl px-4 py-3 mt-1"
-                        placeholder="4">
+                        placeholder="4" required>
                 </div>
 
                 <div>
                     <label class="text-sm font-medium text-gray-700">
                         Bed Count
-                    </label>
+                    </label >
 
                     <input type="number"
                         class="bed_count w-full border rounded-xl px-4 py-3 mt-1"
-                        placeholder="2">
+                        placeholder="2" required>
                 </div>
 
             </div>
@@ -92,7 +92,7 @@ window.initHotelFunction = function initHotelFunction() {
 
                 <textarea rows="3"
                     class="room_description w-full border rounded-xl px-4 py-3 mt-1"
-                    placeholder="Ocean facing room"></textarea>
+                    placeholder="Ocean facing room" required></textarea>
             </div>
 
 
@@ -104,7 +104,7 @@ window.initHotelFunction = function initHotelFunction() {
 
                 <input type="file"
                     multiple
-                    class="room_photos w-full border rounded-xl px-4 py-3 mt-1">
+                    class="room_photos w-full border rounded-xl px-4 py-3 mt-1" required>
             </div>
 
 
@@ -132,7 +132,7 @@ window.initHotelFunction = function initHotelFunction() {
 
                 <input type="number"
                     class="price w-full border rounded-xl px-4 py-3 mt-1"
-                    placeholder="12000">
+                    placeholder="12000" required>
             </div>
 
             <div>
@@ -142,7 +142,7 @@ window.initHotelFunction = function initHotelFunction() {
 
                 <input type="number"
                     class="discounted_price w-full border rounded-xl px-4 py-3 mt-1"
-                    placeholder="9999">
+                    placeholder="9999" required>
             </div>
 
         </div></div>
@@ -179,6 +179,7 @@ window.initHotelFunction = function initHotelFunction() {
     let hotelID = $(this).data("hotel-id");
     const formData = new FormData();
     formData.append("hotelID", hotelID);
+    let proceed = true;
 
     $(".addroom-card").each(function (roomIndex) {
       formData.append(
@@ -223,17 +224,35 @@ window.initHotelFunction = function initHotelFunction() {
       $(this)
         .find(".price-card")
         .each(function (priceIndex) {
+          const price = $(this).find(".price").val();
+          const dprice = $(this).find(".discounted_price").val();
+          //check  if the original price is greater that discounted price.
+          if (price < dprice) {
+            //show message
+
+            $(this).find(".discounted_price").addClass("border-red-500");
+            showMessage({
+              status: "error",
+              title: "Error Adding Room",
+              message:
+                "Discounted price should be less than the original price.",
+            });
+            proceed = false;
+            return;
+          }
           formData.append(
             `rooms[${roomIndex}][prices][${priceIndex}][price]`,
-            $(this).find(".price").val(),
+            price,
           );
 
           formData.append(
             `rooms[${roomIndex}][prices][${priceIndex}][discounted_price]`,
-            $(this).find(".discounted_price").val(),
+            dprice,
           );
         });
     });
+
+    if (!proceed) return;
     const response = await apiCall({
       mode: "POST",
       isJson: false,
@@ -259,7 +278,7 @@ window.initHotelFunction = function initHotelFunction() {
     clearInputs();
 
     renderRooms(hotelID);
-    document.getElementById("AddRoomModal").classList.add("hidden");
+    document.getElementById("RoomModal").classList.add("hidden");
   });
   $("#hotelForm").on("submit", async function (e) {
     e.preventDefault();
@@ -275,13 +294,17 @@ window.initHotelFunction = function initHotelFunction() {
     formData.append("hotel[full_address]", $("#hotel_full_address").val());
     formData.append("hotel[province]", $("#hotel_province").val());
     formData.append("hotel[city]", $("#hotel_city").val());
+    formData.append(
+      "hotel[external_form_url]",
+      $("#hotel_external_form_url").val(),
+    );
 
     // =========================
     // HOTEL PHOTOS
     // =========================
 
     let hotelPhotos = $("#hotel_photos")[0].files;
-
+    let proceed = true;
     for (let i = 0; i < hotelPhotos.length; i++) {
       formData.append("hotel[photos][]", hotelPhotos[i]);
     }
@@ -333,18 +356,34 @@ window.initHotelFunction = function initHotelFunction() {
       $(this)
         .find(".price-card")
         .each(function (priceIndex) {
+          const price = $(this).find(".price").val();
+          const dprice = $(this).find(".discounted_price").val();
+          //check  if the original price is greater that discounted price.
+          if (price < dprice) {
+            //show message
+
+            $(this).find(".discounted_price").addClass("border-red-500");
+            showMessage({
+              status: "error",
+              title: "Error Adding Room",
+              message:
+                "Discounted price should be less than the original price.",
+            });
+            proceed = false;
+            return;
+          }
           formData.append(
             `rooms[${roomIndex}][prices][${priceIndex}][price]`,
-            $(this).find(".price").val(),
+            price,
           );
 
           formData.append(
             `rooms[${roomIndex}][prices][${priceIndex}][discounted_price]`,
-            $(this).find(".discounted_price").val(),
+            dprice,
           );
         });
     });
-
+    if (!proceed) return;
     postData(formData);
   });
   loadHotels();
@@ -365,7 +404,7 @@ window.initHotelFunction = function initHotelFunction() {
       });
       return;
     }
-
+    console.log(res);
     HOTEL_DATA = res.data;
 
     renderHotels(HOTEL_DATA);
@@ -405,6 +444,49 @@ window.initHotelFunction = function initHotelFunction() {
 
     $("#hotelContainer").html(html);
   }
+  $("#editHotelBtn").on("click", function (e) {
+    const editsvg = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.862 4.487a2.25 2.25 0 113.182 3.182L8.25 19.463 3 21l1.537-5.25L16.862 4.487z" />
+                    </svg>`;
+    const cancelsvg = `<svg xmlns="http://www.w3.org/2000/svg"
+         fill="none"
+         viewBox="0 0 24 24"
+         stroke-width="1.5"
+         stroke="currentColor"
+         class="w-6 h-auto aspect-square text-white bg-red-600 rounded-full">
+        <path stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12" />
+    </svg>`;
+
+    const editBtn = $(this);
+    if (editBtn.hasClass("cancel")) {
+      editBtn.html(editsvg);
+      editBtn.removeClass("cancel");
+      enableEditing(false);
+    } else {
+      editBtn.html(cancelsvg);
+      editBtn.addClass("cancel");
+      enableEditing(true);
+    }
+    function enableEditing(rule = false) {
+      const form = document.getElementById("modalInfoForm");
+      const inputs = form.querySelectorAll("input, textarea, select");
+
+      inputs.forEach((input) => {
+        if (rule) {
+          input.removeAttribute("disabled");
+          input.classList.remove("bg-gray-300");
+        } else {
+          input.setAttribute("disabled", true);
+          input.classList.add("bg-gray-300");
+        }
+      });
+    }
+  });
   $(document).on("click", ".hotel-card", function (e) {
     if ($(e.target).hasClass("deleteHotelBtn")) return;
 
@@ -414,15 +496,17 @@ window.initHotelFunction = function initHotelFunction() {
 
     if (!hotel) return;
 
-    $("#modalHotelName").text(hotel.name);
-    $("#modalHotelDesc").text(hotel.description ?? "");
-    $("#modalHotelAddress").text(`${hotel.full_address}`);
+    $("#modalHotelTitle").text(hotel.name);
+    $("#modalHotelName").val(hotel.name ?? "");
+    $("#modalHotelDesc").val(hotel.description ?? "");
+    $("#modalHotelAddress").val(`${hotel.full_address}`);
+    $("#modalHotelExteralForm").val(`${hotel.forms?.form_url || "No Url"}`);
 
     renderRooms(id);
     renderReviews(hotel.reviews);
 
     initModal({
-      modalId: "HotelModal",
+      modalId: "HotelInfoModal",
     });
     $("#addRoomForm").attr("data-hotel-id", id);
   });
@@ -451,6 +535,13 @@ window.initHotelFunction = function initHotelFunction() {
       url: `/api/hotels/rooms/${id}`,
       isJson: true,
     });
+    console.log(rooms);
+    if (!rooms.success) {
+      $("#roomContainer").html(
+        '<div class="col-span-2 p-5 w-full text-zinc-500 text-center font-semibold"> No available rooms for this hotel</div>',
+      );
+      return;
+    }
 
     rooms.data.forEach((room) => {
       let img = room.photos?.[0] ?? "https://via.placeholder.com/300";

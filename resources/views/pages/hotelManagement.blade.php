@@ -10,7 +10,7 @@
 
 </div>
 {{-- MODAL --}}
-<div id="DocumentModal" class="fixed inset-0 hidden z-40 flex items-center justify-center bg-black/50 px-4 modal">
+<div id="HotelModal" class="fixed inset-0 hidden z-40 flex items-center justify-center bg-black/50 px-4 modal">
 
     <div class="bg-white rounded-2xl shadow-2xl w-full lg:max-w-[80vw] max-h-[90vh] overflow-y-auto">
 
@@ -51,7 +51,7 @@
                             </label>
 
                             <input type="text" id="hotel_name" class="w-full border rounded-xl px-4 py-3 mt-1"
-                                placeholder="Ocean Paradise Resort">
+                                placeholder="Ocean Paradise Resort" required>
                         </div>
 
                         <div>
@@ -60,7 +60,7 @@
                             </label>
 
                             <input type="text" id="hotel_province" class="w-full border rounded-xl px-4 py-3 mt-1"
-                                placeholder="Aklan">
+                                placeholder="Aklan" required>
                         </div>
 
                     </div>
@@ -73,7 +73,7 @@
                             </label>
 
                             <input type="text" id="hotel_city" class="w-full border rounded-xl px-4 py-3 mt-1"
-                                placeholder="Malay">
+                                placeholder="Malay" required>
                         </div>
 
                         <div>
@@ -82,7 +82,7 @@
                             </label>
 
                             <input type="text" id="hotel_full_address"
-                                class="w-full border rounded-xl px-4 py-3 mt-1" placeholder="123 Beach Road">
+                                class="w-full border rounded-xl px-4 py-3 mt-1" placeholder="123 Beach Road" required>
                         </div>
 
                     </div>
@@ -93,7 +93,17 @@
                         </label>
 
                         <textarea id="hotel_description" rows="4" class="w-full border rounded-xl px-4 py-3 mt-1"
-                            placeholder="Luxury beachfront hotel"></textarea>
+                            placeholder="Luxury beachfront hotel" required></textarea>
+                    </div>
+
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">
+                            External Form Url
+                        </label>
+
+                        <input type="text" id="hotel_external_form_url"
+                            class="w-full border rounded-xl px-4 py-3 mt-1" placeholder="https://forms.google.com"
+                            required>
                     </div>
 
                     <div>
@@ -101,8 +111,8 @@
                             Hotel Photos
                         </label>
 
-                        <input type="file" id="hotel_photos" multiple
-                            class="w-full border rounded-xl px-4 py-3 mt-1">
+                        <input type="file" id="hotel_photos" multiple class="w-full border rounded-xl px-4 py-3 mt-1"
+                            required>
                     </div>
 
                 </div>
@@ -155,7 +165,7 @@
 
 </div>
 {{-- MODAL --}}
-<div id="AddRoomModal" class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-4 modal">
+<div id="RoomModal" class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-4 modal">
 
     <div class="bg-white rounded-2xl shadow-2xl w-full lg:max-w-[80vw] max-h-[90vh] overflow-y-auto">
 
@@ -316,57 +326,106 @@
 
 </div>
 
-<div id="HotelModal" class="fixed inset-0 hidden z-40 bg-black/50 flex items-center justify-center px-4">
+<div id="HotelInfoModal" class="fixed inset-0 hidden z-40 bg-black/50 flex items-center justify-center px-4">
 
     <div class="bg-white w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl">
 
         <!-- HEADER -->
         <div class="p-5 border-b flex justify-between items-center">
 
-            <h2 id="modalHotelName" class="text-xl font-semibold"></h2>
+            <h2 id="modalHotelTitle" class="text-xl font-semibold">Hotel Info</h2>
+            <div>
+                <button type="button" id="editHotelBtn"
+                    class=" p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.862 4.487a2.25 2.25 0 113.182 3.182L8.25 19.463 3 21l1.537-5.25L16.862 4.487z" />
+                    </svg>
+                </button>
+                <button class="modal-close text-xl">✕</button>
+            </div>
 
-            <button class="modal-close text-xl">✕</button>
 
         </div>
-
         <!-- CONTENT -->
         <div class="p-5 space-y-8">
 
-            <!-- HOTEL INFO -->
-            <div>
-                <p id="modalHotelDesc" class="text-gray-600"></p>
-                <p id="modalHotelAddress" class="text-sm text-gray-500 mt-1"></p>
-            </div>
+            <form id="modalInfoForm">
+                <!-- HOTEL INFO -->
+                <div class="space-y-4">
 
-            <!-- ROOMS -->
-            <div>
-                <div class="w-full flex justify-start align-middle gap-3 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Name
+                        </label>
+                        <input type="text" id="modalHotelName"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-300 " disabled>
+                    </div>
 
-                    <h3 class="text-lg font-semibold">Rooms</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                        </label>
+                        <input type="text" id="modalHotelDesc"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-300" disabled>
+                    </div>
 
-                    <button type="button" id="addRoomNewBtn"
-                        class="bg-green-500 hover:bg-green-700 text-white px-2 rounded-xl text-sm">
-                        Add Room
-                    </button>
-                </div>
-                <div id="roomContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Address
+                        </label>
+                        <input type="text" id="modalHotelAddress"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-300" disabled>
+                    </div>
 
-            <!-- REVIEWS -->
-            <div>
-                <h3 class="text-lg font-semibold mb-4">Reviews</h3>
-                <div id="reviewContainer" class="space-y-3"></div>
-            </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            External Form URL
+                        </label>
+                        <input type="text" id="modalHotelExteralForm"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-300" disabled>
+                    </div>
+
+            </form>
 
         </div>
 
-        <div class="p-4 border-t flex justify-end">
-            <button class="modal-close bg-gray-200 px-4 py-2 rounded-lg">
-                Close
-            </button>
+        <!-- ROOMS -->
+        <div>
+            <div class="w-full flex justify-start align-middle gap-3 mb-4">
+
+                <h3 class="text-lg font-semibold">Rooms</h3>
+
+                <button type="button" id="addRoomNewBtn"
+                    class="bg-green-500 hover:bg-green-700 text-white px-2 rounded-xl text-sm">
+                    Add Room
+                </button>
+            </div>
+            <div id="roomContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- REVIEWS -->
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Reviews</h3>
+            <div id="reviewContainer" class="space-y-3"></div>
         </div>
 
     </div>
+
+
+    <div class="p-4 border-t flex justify-end">
+
+        <button type="submit" id="saveNinfo"
+            class="hidden bg-blue-500 border border-gray-300 text-gray-200 hover:bg-blue-800 px-5 py-2 rounded-lg text-sm font-medium">
+            Save
+        </button>
+        <button class="modal-close bg-gray-200 px-4 py-2 rounded-lg">
+            Close
+        </button>
+    </div>
+
+</div>
 
 </div>
 <script>

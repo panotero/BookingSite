@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<x-header>
+    Home
+</x-header>
+
+<body
+    class="bg-olive-50 text-gray-800 dark:bg-dark_bg dark:text-gray-300 font-sans antialiased selection:bg-olive-200 selection:text-olive-900">
+    <x-navigator />
+    <!-- HOTEL INFO SECTION -->
+    <section id="hotel-info" class="bg-cream py-16">
+
+        <div class="max-w-7xl mx-auto px-6">
+
+            <div class="grid lg:grid-cols-2 gap-10 items-start">
+
+                <!-- Gallery -->
+                <div>
+
+                    <div class="swiper hotel-gallery rounded-[32px] overflow-hidden shadow-xl">
+
+                        <div class="swiper-wrapper" id="hotel-gallery-wrapper">
+                            <!-- JS inject slides here -->
+                        </div>
+
+                        <div class="swiper-pagination"></div>
+
+                    </div>
+
+                </div>
+
+                <!-- Info -->
+                <div>
+
+                    <!-- Rating -->
+                    <div class="flex items-center gap-2 mb-4">
+
+                        <div id="hotel-rating-stars" class="text-yellow-500 text-xl">
+                            ★★★★★
+                        </div>
+
+                        <span id="hotel-review-count" class="text-gray-500">
+                            0 Reviews
+                        </span>
+
+                    </div>
+
+                    <!-- Name -->
+                    <h1 id="hotel-name" class="text-4xl lg:text-6xl font-bold text-olive-700">
+                    </h1>
+
+                    <!-- Location -->
+                    <p id="hotel-location" class="text-gray-500 mt-3">
+                    </p>
+
+                    <!-- Description -->
+                    <p id="hotel-description" class="mt-8 text-gray-600 leading-relaxed text-lg">
+                    </p>
+
+                    <!-- CTA -->
+                    <div class="mt-10">
+
+                        <a id="hotel-book-btn" target="_blank" rel="noopener"
+                            class="bg-olive-500 hover:bg-olive-600 text-white px-8 py-4 rounded-xl font-semibold inline-flex transition">
+                            Book Now
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ROOMS SECTION -->
+    <section class="py-24 bg-paper">
+
+        <div class="max-w-7xl mx-auto px-6">
+
+            <!-- Header -->
+            <div class="mb-12">
+
+                <h2 class="text-4xl font-bold text-olive-700">
+                    Available Rooms
+                </h2>
+
+                <p class="text-gray-600 mt-3">
+                    Choose the room that best fits your stay.
+                </p>
+
+            </div>
+
+            <!-- Scroll Container -->
+            <div id="rooms-container" class="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scroll-smooth">
+
+                <!-- JS inject room cards here -->
+
+                <!-- empty state fallback -->
+                <div id="rooms-empty" class="text-gray-500 hidden">
+                    No rooms available.
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark_bg text-white py-12 mt-12 border-t border-white/10">
+        <div class="max-w-screen-xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0 text-center md:text-left">
+                <h5 class="font-bold text-xl tracking-wide">LUXESTAY</h5>
+                <p class="text-olive-400 text-sm mt-1">© 2026 All rights reserved.</p>
+            </div>
+            <div class="flex space-x-6 text-sm text-olive-200">
+                <a href="#" class="hover:text-white transition">Privacy</a>
+                <a href="#" class="hover:text-white transition">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+
+            const hotelID = new URLSearchParams(window.location.search).get("id");
+
+            if (!hotelID) {
+                console.error("Hotel ID not found.");
+                return;
+            }
+
+            const hotel = await getHotel();
+
+            if (!hotel || !hotel.data) {
+                console.error("Hotel not found.");
+                return;
+            }
+
+            renderHotel(hotel.data);
+
+            async function getHotel() {
+
+                const res = await apiCall({
+                    mode: "GET",
+                    url: `/api/hotel/${hotelID}`,
+                    isJson: true,
+                });
+
+                return res;
+            }
+
+            function renderHotel(hotel) {
+
+                // HOTEL INFO
+
+                document.getElementById("hotel-name").textContent =
+                    hotel.name;
+
+                document.getElementById("hotel-location").textContent =
+                    `${hotel.city}, ${hotel.province}`;
+
+                document.getElementById("hotel-description").textContent =
+                    hotel.description;
+
+                document.getElementById("hotel-review-count").textContent =
+                    `${hotel.reviews?.length ?? 0} Reviews`;
+
+                const bookButton =
+                    document.getElementById("hotel-book-btn");
+
+                if (hotel.forms?.form_url) {
+
+                    bookButton.href = hotel.forms.form_url;
+                    bookButton.target = "_blank";
+
+                } else {
+
+                    bookButton.href = "#";
+                    bookButton.classList.add(
+                        "opacity-50",
+                        "pointer-events-none"
+                    );
+
+                }
+
+                // GALLERY
+
+                const gallery =
+                    document.getElementById(
+                        "hotel-gallery-wrapper"
+                    );
+
+                gallery.innerHTML =
+                    hotel.photos?.length ?
+                    hotel.photos.map(photo => `
+                    <div class="swiper-slide">
+                        <img
+                            src="${photo}"
+                            alt="${hotel.name}"
+                            class="w-full h-[250px] sm:h-[350px] lg:h-[550px] object-cover">
+                    </div>
+                `).join("") :
+                    `
+                    <div class="swiper-slide">
+                        <img
+                            src="/images/no-image.jpg"
+                            class="w-full h-[250px] sm:h-[350px] lg:h-[550px] object-cover">
+                    </div>
+                `;
+
+                // ROOMS
+
+                const roomsContainer =
+                    document.getElementById("rooms-container");
+
+                roomsContainer.innerHTML = "";
+
+                hotel.rooms.forEach(room => {
+
+                    const pricing =
+                        room.prices?.[0] ?? null;
+
+                    const originalPrice =
+                        pricing?.price ?? null;
+
+                    const discountedPrice =
+                        pricing?.discounted_price ?? null;
+
+                    roomsContainer.innerHTML += `
+
+                <div class="
+                    min-w-[320px]
+                    md:min-w-[380px]
+                    bg-white
+                    rounded-[24px]
+                    overflow-hidden
+                    shadow-lg
+                    border border-gray-100
+                    flex-shrink-0">
+
+                    <img
+                        src="${room.photos?.[0] ?? '/images/no-image.jpg'}"
+                        class="w-full h-[220px] object-cover">
+
+                    <div class="p-6">
+
+                        <h3 class="text-2xl font-bold text-olive-700">
+                            ${room.room_name}
+                        </h3>
+
+                        <p class="text-gray-600 mt-3">
+                            ${room.description}
+                        </p>
+
+                        <div class="flex flex-wrap gap-4 mt-5 text-sm text-gray-500">
+
+                            <span>
+                                ${room.guest_capacity} Guests
+                            </span>
+
+                            <span>
+                                ${room.bed_count} Beds
+                            </span>
+
+                            <span>
+                                ${room.room_area}
+                            </span>
+
+                        </div>
+
+                        <div class="mt-6">
+
+                            ${
+                                discountedPrice &&
+                                Number(discountedPrice) > 0
+                                    ? `
+                                                                <div class="text-gray-400 line-through text-lg">
+                                                                    ₱${Number(originalPrice).toLocaleString()}
+                                                                </div>
+
+                                                                <div class="text-4xl font-bold text-olive-700">
+                                                                    ₱${Number(discountedPrice).toLocaleString()}
+                                                                </div>
+                                                            `
+                                    : `
+                                                                <div class="text-4xl font-bold text-olive-700">
+                                                                    ₱${Number(originalPrice).toLocaleString()}
+                                                                </div>
+                                                            `
+                            }
+
+                        </div>
+
+                        ${
+                            hotel.forms?.form_url
+                                ? `
+                                                            <a
+                                                                href="${hotel.forms.form_url}"
+                                                                target="_blank"
+                                                                class="mt-6 inline-flex bg-olive-500 hover:bg-olive-600 text-white px-6 py-3 rounded-xl font-semibold">
+                                                                Book Now
+                                                            </a>
+                                                        `
+                                : ''
+                        }
+
+                    </div>
+
+                </div>
+
+            `;
+                });
+
+                // SWIPER
+
+                new Swiper(".hotel-gallery", {
+                    loop: true,
+                    autoplay: {
+                        delay: 4000,
+                    },
+                    pagination: {
+                        el: ".hotel-gallery .swiper-pagination",
+                        clickable: true,
+                    },
+                });
+            }
+
+            const roomsContainer = document.getElementById("rooms-container");
+
+            roomsContainer.addEventListener("wheel", (e) => {
+
+                const delta = e.deltaY;
+
+                const maxScrollLeft = roomsContainer.scrollWidth - roomsContainer.clientWidth;
+                const currentScroll = roomsContainer.scrollLeft;
+
+                const atStart = currentScroll <= 0;
+                const atEnd = currentScroll >= maxScrollLeft;
+
+                const scrollingRight = delta > 0;
+                const scrollingLeft = delta < 0;
+
+                // If we can still scroll horizontally, prevent page scroll
+                if (
+                    (scrollingLeft && !atStart) ||
+                    (scrollingRight && !atEnd)
+                ) {
+                    e.preventDefault();
+                    roomsContainer.scrollLeft += delta;
+                }
+
+            }, {
+                passive: false
+            });
+        });
+    </script>
+</body>
+
+</html>
+```
