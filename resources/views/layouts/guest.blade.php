@@ -11,8 +11,6 @@
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -34,15 +32,12 @@
 
                 <div>
 
-                    <h1 class="text-3xl md:text-4xl font-bold mt-2 leading-tight">
-                        Management System
+                    <h1 class="text-3xl md:text-4xl font-bold mt-2 leading-tight text-olive-500 drop-shadow">
+                        <img src="/images/MYps.png" alt="Logo"> Hotels
                     </h1>
                 </div>
 
 
-                <p class="text-sm opacity-80 pt-4 max-w-xs">
-                    Mangement in one stop!
-                </p>
             </div>
 
             <!-- RIGHT SIDE (Login Form Panel) -->

@@ -12,16 +12,36 @@ use App\Models\Room;
 use App\Models\Price;
 use App\Models\HotelForm;
 
+use App\Services\ArrayMediaService;
+
 class HotelController extends Controller
 {
 
-    protected $fileUploadService;
 
-    public function __construct(FileUploadService $fileUploadService)
+    protected $fileUploadService, $arrayMediaService;
+
+
+    public function __construct(FileUploadService $fileUploadService, ArrayMediaService $arrayMediaService)
     {
         $this->fileUploadService = $fileUploadService;
+        $this->arrayMediaService = $arrayMediaService;
     }
-    public function index() {}
+    public function index($hotelID)
+    {
+
+        $hotel = Hotel::with(
+            'rooms.prices',
+            'reviews',
+            'forms'
+        )->where('id', $hotelID)->first();
+
+
+        return response()->json([
+            'success' => true,
+            'data' => $hotel,
+            'message' => "success",
+        ]);
+    }
     public function home()
     {
         return view('clients.home');
@@ -29,6 +49,11 @@ class HotelController extends Controller
     public function hotel()
     {
         return view('clients.hotel');
+    }
+    public  function hotels()
+    {
+
+        return view('clients.hotels');
     }
 
     public function store(Request $request)
@@ -94,7 +119,7 @@ class HotelController extends Controller
 
     public function storeCompleteHotel(Request $request)
     {
-
+        // dd($request->file('hotel.logo'));
         DB::beginTransaction();
 
         try {
@@ -123,6 +148,18 @@ class HotelController extends Controller
                 );
             }
 
+            if (isset($hotelData['logo'])) {
+
+                $uploaded = $this->fileUploadService->uploadFile(
+                    [$hotelData['logo']], // must be array
+                    'uploads/hotels'
+                );
+
+                $hotelData['logo'] = $uploaded[0]; // IMPORTANT: string only
+            }
+            // dd($hotelLogo);
+
+
             // =====================================================
             // CREATE HOTEL
             // =====================================================
@@ -134,6 +171,7 @@ class HotelController extends Controller
                 'province' => $hotelData['province'] ?? null,
                 'city' => $hotelData['city'] ?? null,
                 'photos' => $hotelPhotos,
+                'logo' => $hotelData['logo'],
             ]);
 
             $externalFormUrl = HotelForm::create([
@@ -264,7 +302,29 @@ class HotelController extends Controller
         try {
             DB::beginTransaction();
             //put the db transaction here
-            $response = Hotel::where('id', $request->id)->delete();
+            $Hotel = Hotel::with('rooms')->where('id', $request->id)->first();
+            // dd($Hotel);
+
+            $this->fileUploadService->deleteFile($Hotel->logo);
+
+            //delete files from the
+            $photosDIR = $Hotel->photos;
+            foreach ($photosDIR as $photo) {
+                $this->fileUploadService->deleteFile($photo);
+            }
+
+            //check if there is room
+            if ($Hotel->rooms) {
+                foreach ($Hotel->rooms as $room) {
+                    foreach ($room->photos as $roomphotos) {
+
+                        $this->fileUploadService->deleteFile($roomphotos);
+                    }
+                }
+            }
+
+            //call the delete
+            $response = $Hotel->delete();
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -277,5 +337,62 @@ class HotelController extends Controller
                 'message' => $e
             ]);
         }
+    }
+
+
+    public function deleteHotelPhoto(Request $request)
+    {
+
+        try {
+
+            //get room info first
+            $hotel = Hotel::where('id', $request->roomID)->first();
+            $photo = $request->photo;
+
+            //delete the photo from array and storage
+            $response = $this->arrayMediaService->removeItem($hotel, 'photos', $photo);
+            //commit db
+
+            //return response
+            return response()->json([
+                'success' => true,
+                'message' => $response
+            ]);
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $ex
+            ]);
+        }
+    }
+    public function addHotelPhoto(Request $request)
+    {
+        $hotel = Hotel::findOrFail($request->hotelID);
+
+        $files = $request->file('photos');
+
+        if (!$files) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No files uploaded.'
+            ], 422);
+        }
+
+        $uploadedUrls = $this->fileUploadService->uploadFile(
+            $files,
+            'uploads/hotels'
+        );
+
+        $this->arrayMediaService->addItems(
+            $hotel,
+            'photos',
+            $uploadedUrls
+        );
+
+        return response()->json([
+            'success' => true,
+            'photos' => $hotel->fresh()->photos
+        ]);
     }
 }

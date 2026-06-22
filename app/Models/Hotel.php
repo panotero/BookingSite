@@ -16,6 +16,7 @@ class Hotel extends Model
         'province',
         'city',
         'photos',
+        'logo',
     ];
 
     protected $casts = [

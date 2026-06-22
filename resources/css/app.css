@@ -13,3 +13,14 @@
   transform: translateZ(0);
   will-change: transform;
 }
+
+@font-face {
+  font-family: "Hamilton";
+  src: url("/assets/font/hamilton/hamilton.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-hamilton {
+  font-family: "Hamilton", cursive;
+}

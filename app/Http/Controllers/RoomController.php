@@ -10,15 +10,18 @@ use App\Models\Price;
 
 use App\Services\FileUploadService;
 
+use App\Services\ArrayMediaService;
 
 class RoomController extends Controller
 {
 
-    protected $fileUploadService;
+    protected $fileUploadService, $arrayMediaService;
 
-    public function __construct(FileUploadService $fileUploadService)
+
+    public function __construct(FileUploadService $fileUploadService, ArrayMediaService $arrayMediaService)
     {
         $this->fileUploadService = $fileUploadService;
+        $this->arrayMediaService = $arrayMediaService;
     }
 
     public function index()
@@ -93,7 +96,69 @@ class RoomController extends Controller
 
     public function getRoom($roomID)
     {
-        dd($roomID);
+        $room = Room::where('id', $roomID)->first();
+        return response()->json([
+            'success' => true,
+            'data' => $room,
+            'message' => "success"
+        ]);
+    }
+
+    public function deleteRoomPhoto(Request $request)
+    {
+        try {
+
+            //get room info first
+            $room = Room::where('id', $request->roomID)->first();
+            $photo = $request->photo;
+
+            //delete the photo from array and storage
+            $response = $this->arrayMediaService->removeItem($room, 'photos', $photo);
+            //commit db
+
+            //return response
+            return response()->json([
+                'success' => true,
+                'message' => $response
+            ]);
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $ex
+            ]);
+        }
+    }
+
+    public function addRoomPhoto(Request $request)
+    {
+
+        $room = Room::where('id', $request->roomID)->first();
+
+        $files = $request->file('photos');
+
+        if (!$files) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No files uploaded.'
+            ], 422);
+        }
+
+        $uploadedUrls = $this->fileUploadService->uploadFile(
+            $files,
+            'uploads/rooms'
+        );
+
+        $this->arrayMediaService->addItems(
+            $room,
+            'photos',
+            $uploadedUrls
+        );
+
+        return response()->json([
+            'success' => true,
+            'photos' => $room->fresh()->photos
+        ]);
     }
 
     public function getRoomByHotel($hotelID, Request $request)
@@ -117,15 +182,29 @@ class RoomController extends Controller
     }
     public function deleteRoomByHotel($roomID, Request $request)
     {
+        try {
 
-        $room = Room::findOrFail($roomID);
+            DB::beginTransaction();
+            $room = Room::findOrFail($roomID);
+            $roomPhotos =  $room->photos;
+            foreach ($roomPhotos as $photo) {
+                $this->fileUploadService->deleteFile($photo);
+            }
 
-        $room->delete();
+            $room->delete();
+            DB::commit();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Room deleted successfully',
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Room deleted successfully',
+            ]);
+        } catch (\Exception $ex) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $ex,
+            ]);
+        }
     }
 
     public function addNewRoom(Request $request)

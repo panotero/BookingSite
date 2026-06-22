@@ -23,6 +23,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=The+Nautigal:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        .the-nautigal-regular {
+            font-family: "The Nautigal", cursive;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        .the-nautigal-bold {
+            font-family: "The Nautigal", cursive;
+            font-weight: 700;
+            font-style: normal;
+        }
+    </style>
     <!-- Configure Tailwind Colors (Olive, Beige, Cream) -->
     <script>
         tailwind.config = {

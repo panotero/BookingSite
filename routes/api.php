@@ -57,19 +57,23 @@ Route::middleware(['auth'])->group(function () {
 
     //hotel management functions
     Route::prefix('hotels')->group(function () {
+        Route::get('/info/{id}',  [HotelController::class, 'index']);
         Route::post('/complete', [HotelController::class, 'storeCompleteHotel']);
         Route::get('/all', [HotelController::class, 'getAllHotels']);
         Route::delete('/delete/{id}', [HotelController::class, 'deleteHotel']);
         Route::get('/rooms/{id}', [RoomController::class, 'getRoomByHotel']);
         Route::delete('/room/delete/{id}', [RoomController::class, 'deleteRoomByHotel']);
         Route::post('/room/add', [RoomController::class, 'addNewRoom']);
+        Route::delete('/photo', [HotelController::class, 'deleteHotelPhoto']);
+        Route::post('/photo', [HotelController::class, 'addHotelPhoto']);
     });
 
 
     //hotel rooms
     Route::prefix('room')->group(function () {
         Route::get('/{id}', [RoomController::class, 'getRoom']);
-        Route::delete('/{id}', [RoomController::class, 'deleteRoom']);
+        Route::delete('/photo', [RoomController::class, 'deleteRoomPhoto']);
+        Route::post('/photo', [RoomController::class, 'addRoomPhoto']);
     });
 
 

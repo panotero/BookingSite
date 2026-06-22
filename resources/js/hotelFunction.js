@@ -304,46 +304,50 @@ window.initHotelFunction = function initHotelFunction() {
     // =========================
 
     let hotelPhotos = $("#hotel_photos")[0].files;
+    let hotelLogo = $("#hotel_logo")[0].files[0];
     let proceed = true;
     for (let i = 0; i < hotelPhotos.length; i++) {
       formData.append("hotel[photos][]", hotelPhotos[i]);
     }
 
+    formData.append("hotel[logo]", hotelLogo);
+
     // =========================
     // ROOMS
     // =========================
 
-    $(".room-card").each(function (roomIndex) {
+    const roomCards = document.querySelectorAll(".room-card");
+    roomCards.forEach((roomCard, roomIndex) => {
       formData.append(
         `rooms[${roomIndex}][room_name]`,
-        $(this).find(".room_name").val(),
+        roomCard.querySelector(".room_name").value,
       );
 
       formData.append(
         `rooms[${roomIndex}][description]`,
-        $(this).find(".room_description").val(),
+        roomCard.querySelector(".room_description").value,
       );
 
       formData.append(
         `rooms[${roomIndex}][guest_capacity]`,
-        $(this).find(".guest_capacity").val(),
+        roomCard.querySelector(".guest_capacity").value,
       );
 
       formData.append(
         `rooms[${roomIndex}][bed_count]`,
-        $(this).find(".bed_count").val(),
+        roomCard.querySelector(".bed_count").value,
       );
 
       formData.append(
         `rooms[${roomIndex}][room_area]`,
-        $(this).find(".room_area").val(),
+        roomCard.querySelector(".room_area").value,
       );
 
       // =========================
       // ROOM PHOTOS
       // =========================
 
-      let roomPhotos = $(this).find(".room_photos")[0].files;
+      const roomPhotos = roomCard.querySelector(".room_photos").files;
 
       for (let p = 0; p < roomPhotos.length; p++) {
         formData.append(`rooms[${roomIndex}][photos][]`, roomPhotos[p]);
@@ -353,25 +357,29 @@ window.initHotelFunction = function initHotelFunction() {
       // ROOM PRICES
       // =========================
 
-      $(this)
-        .find(".price-card")
-        .each(function (priceIndex) {
-          const price = $(this).find(".price").val();
-          const dprice = $(this).find(".discounted_price").val();
-          //check  if the original price is greater that discounted price.
-          if (price < dprice) {
-            //show message
+      roomCard
+        .querySelectorAll(".price-card")
+        .forEach((priceCard, priceIndex) => {
+          const price = priceCard.querySelector(".price").value;
+          const dprice = priceCard.querySelector(".discounted_price").value;
 
-            $(this).find(".discounted_price").addClass("border-red-500");
+          // check if discounted price is greater than original price
+          if (Number(price) < Number(dprice)) {
+            priceCard
+              .querySelector(".discounted_price")
+              .classList.add("border-red-500");
+
             showMessage({
               status: "error",
               title: "Error Adding Room",
               message:
                 "Discounted price should be less than the original price.",
             });
+
             proceed = false;
             return;
           }
+
           formData.append(
             `rooms[${roomIndex}][prices][${priceIndex}][price]`,
             price,
@@ -404,7 +412,6 @@ window.initHotelFunction = function initHotelFunction() {
       });
       return;
     }
-    console.log(res);
     HOTEL_DATA = res.data;
 
     renderHotels(HOTEL_DATA);
@@ -443,6 +450,16 @@ window.initHotelFunction = function initHotelFunction() {
     });
 
     $("#hotelContainer").html(html);
+
+    const delbtn = document.querySelectorAll(".deleteBtn");
+    delbtn.forEach((deleteButton) => {
+      deleteButton.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const deleteId = this.dataset.deleteId;
+
+        DeleteHotel(deleteId);
+      });
+    });
   }
   $("#editHotelBtn").on("click", function (e) {
     const editsvg = `
@@ -487,14 +504,90 @@ window.initHotelFunction = function initHotelFunction() {
       });
     }
   });
-  $(document).on("click", ".hotel-card", function (e) {
+  $(document).on("click", ".hotel-card", async function (e) {
     if ($(e.target).hasClass("deleteHotelBtn")) return;
 
     let id = $(this).data("id");
+    //apicall for get hotel  info
+    document.getElementById("AddHotelPhotoModal").dataset.hotelId = id;
+    renderHotelInfo(id);
+    initModal({
+      modalId: "HotelInfoModal",
+    });
+    $("#addRoomForm").attr("data-hotel-id", id);
+  });
 
-    let hotel = HOTEL_DATA.find((h) => h.id == id);
+  document
+    .getElementById("submithotelphoto")
+    .addEventListener("click", async function (e) {
+      const input = document.getElementById("hotelPhotoInput");
+      const hotelId =
+        document.getElementById("AddHotelPhotoModal").dataset.hotelId;
+      const formData = new FormData();
 
-    if (!hotel) return;
+      formData.append("hotelID", hotelId);
+
+      const files = input.files;
+
+      for (const file of files) {
+        formData.append("photos[]", file);
+      }
+
+      console.log("HOTEL PHOTOS");
+
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      // await apiCall(...)
+
+      const response = await apiCall({
+        mode: "POST",
+        isJson: false,
+        payload: formData,
+        url: "/api/hotels/photo",
+        button: this,
+      });
+
+      if (!response.success) {
+        showMessage({
+          status: "error",
+          title: "Error Adding Photo",
+          message:
+            "There is some error saving your information. Please contact system administrator",
+        });
+        return;
+      }
+
+      showMessage({
+        status: "success",
+        title: "Room Added!",
+      });
+      clearInputs();
+      closemodals("AddHotelPhotoModal");
+
+      document.getElementById("hotelPhotoInfo").innerHTML = "";
+      renderHotelInfo(hotelId);
+    });
+
+  async function renderHotelInfo(hotelId) {
+    const hotels = await apiCall({
+      mode: "GET",
+      url: `/api/hotels/info/${hotelId}`,
+      isJson: true,
+    });
+
+    if (!hotels.success) {
+      showMessage({
+        status: "error",
+        title: "Error Fetching Information",
+        message:
+          "There is some error fetching your information. Please contact system administrator",
+      });
+      return;
+    }
+
+    const hotel = hotels.data;
 
     $("#modalHotelTitle").text(hotel.name);
     $("#modalHotelName").val(hotel.name ?? "");
@@ -502,14 +595,16 @@ window.initHotelFunction = function initHotelFunction() {
     $("#modalHotelAddress").val(`${hotel.full_address}`);
     $("#modalHotelExteralForm").val(`${hotel.forms?.form_url || "No Url"}`);
 
-    renderRooms(id);
+    renderRooms(hotelId);
     renderReviews(hotel.reviews);
-
-    initModal({
-      modalId: "HotelInfoModal",
+    renderPhotoGallery({
+      container: document.getElementById("hotelPhotoContainer"),
+      photos: hotel.photos,
+      modelId: hotelId,
+      deleteUrl: "/api/hotels/photo/",
+      onDeleteSuccess: () => renderHotelInfo(hotelId, hotel),
     });
-    $("#addRoomForm").attr("data-hotel-id", id);
-  });
+  }
 
   async function renderRooms(id) {
     $("#roomContainer")
@@ -535,7 +630,6 @@ window.initHotelFunction = function initHotelFunction() {
       url: `/api/hotels/rooms/${id}`,
       isJson: true,
     });
-    console.log(rooms);
     if (!rooms.success) {
       $("#roomContainer").html(
         '<div class="col-span-2 p-5 w-full text-zinc-500 text-center font-semibold"> No available rooms for this hotel</div>',
@@ -553,7 +647,7 @@ window.initHotelFunction = function initHotelFunction() {
         : "No Discounted Price";
 
       html += `
-        <div class="relative border rounded-xl overflow-hidden shadow-sm room-card">
+        <div class="relative border rounded-xl overflow-hidden shadow-sm roominfo-card cursor-pointer" data-room-id="${room.id}">
 
             <!-- DELETE ROOM -->
             <button class="deleteRoomBtn absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded-lg"
@@ -583,7 +677,207 @@ window.initHotelFunction = function initHotelFunction() {
     });
 
     $("#roomContainer").html(html);
+
+    const deleteRoomButtons = document.querySelectorAll(".deleteRoomBtn");
+    deleteRoomButtons.forEach((deletebtn) => {
+      deletebtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const id = this.dataset.deleteId;
+        const hotelID = this.dataset.hotelId;
+        DeleteRoom(id, hotelID);
+      });
+    });
+    const roomCard = document.querySelectorAll(".roominfo-card");
+    roomCard.forEach((card) => {
+      card.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const roomId = this.dataset.roomId;
+        //render room info first
+        LoadRoomInfo(roomId);
+
+        //then call the openmodal
+
+        initModal({
+          modalId: "RoomInfoModal",
+        });
+      });
+    });
   }
+
+  document
+    .getElementById("addHotelPhotoBtn")
+    .addEventListener("click", function () {
+      initModal({
+        modalId: "AddHotelPhotoModal",
+      });
+    });
+  document
+    .getElementById("addRoomPhotoBtn")
+    .addEventListener("click", function () {
+      initModal({
+        modalId: "AddRoomPhotoModal",
+      });
+    });
+
+  document
+    .getElementById("roomPhotoInput")
+    .addEventListener("change", function () {
+      const info = document.getElementById("roomPhotoInfo");
+
+      const files = Array.from(this.files);
+
+      if (files.length === 0) {
+        info.innerHTML = "";
+        return;
+      }
+
+      let html = `
+        <p class="font-medium text-gray-800">
+            ${files.length} file(s) selected
+        </p>
+        <ul class="list-disc list-inside text-gray-600 text-xs space-y-1">
+    `;
+
+      files.forEach((file) => {
+        html += `<li>${file.name}</li>`;
+      });
+
+      html += `</ul>`;
+
+      info.innerHTML = html;
+    });
+
+  document
+    .getElementById("hotelPhotoInput")
+    .addEventListener("change", function () {
+      const info = document.getElementById("hotelPhotoInfo");
+
+      const files = Array.from(this.files);
+
+      if (files.length === 0) {
+        info.innerHTML = "";
+        return;
+      }
+
+      let html = `
+        <p class="font-medium text-gray-800">
+            ${files.length} file(s) selected
+        </p>
+        <ul class="list-disc list-inside text-gray-600 text-xs space-y-1">
+    `;
+
+      files.forEach((file) => {
+        html += `<li>${file.name}</li>`;
+      });
+
+      html += `</ul>`;
+
+      info.innerHTML = html;
+    });
+
+  async function LoadRoomInfo(roomId) {
+    const room = await apiCall({
+      mode: "GET",
+      url: `/api/room/${roomId}`,
+      isJson: true,
+    });
+    document.getElementById("AddRoomPhotoModal").dataset.roomId = roomId;
+
+    if (!room.success) {
+      showMessage({
+        status: "error",
+        title: "Error Saving Options",
+        message:
+          "There is some error saving your information. Please contact system administrator",
+      });
+      return;
+    }
+    const roomData = room.data;
+    //initialize value of all fields
+    //select the form
+    const roomInfoForm = document.getElementById("RoomInfoForm");
+    const inputs = {
+      roomName: roomInfoForm.querySelector(".room_name"),
+      roomArea: roomInfoForm.querySelector(".room_area"),
+      guestCapacity: roomInfoForm.querySelector(".guest_capacity"),
+      bedCount: roomInfoForm.querySelector(".bed_count"),
+      roomDescription: roomInfoForm.querySelector(".room_description"),
+    };
+
+    const mapping = {
+      roomName: "room_name",
+      roomArea: "room_area",
+      guestCapacity: "guest_capacity",
+      bedCount: "bed_count",
+      roomDescription: "description",
+    };
+
+    Object.entries(mapping).forEach(([inputKey, dataKey]) => {
+      inputs[inputKey].value = roomData[dataKey] ?? "";
+    });
+
+    //rennder photo cards
+    renderPhotoGallery({
+      container: document.getElementById("roomPhotoContainer"),
+      photos: roomData.photos,
+      modelId: roomId,
+      deleteUrl: "/api/room/photo/",
+      onDeleteSuccess: () => LoadRoomInfo(roomId),
+    });
+  }
+
+  document
+    .getElementById("submitroomphoto")
+    .addEventListener("click", async function (e) {
+      e.preventDefault();
+
+      const input = document.getElementById("roomPhotoInput");
+      const formData = new FormData();
+      const roomId =
+        document.getElementById("AddRoomPhotoModal").dataset.roomId;
+      formData.append("roomID", roomId);
+
+      const files = input.files;
+
+      for (const file of files) {
+        formData.append("photos[]", file);
+      }
+
+      console.log("ROOM PHOTOS");
+
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      // await apiCall(...)
+
+      const response = await apiCall({
+        mode: "POST",
+        isJson: false,
+        payload: formData,
+        url: "/api/room/photo",
+        button: this,
+      });
+
+      if (!response.success) {
+        showMessage({
+          status: "error",
+          title: "Error Adding Photo",
+          message:
+            "There is some error saving your information. Please contact system administrator",
+        });
+        return;
+      }
+
+      showMessage({
+        status: "success",
+        title: "Room Added!",
+      });
+      clearInputs();
+      closemodals("AddRoomPhotoModal");
+      document.getElementById("roomPhotoInfo").innerHTML = "";
+      LoadRoomInfo(roomId);
+    });
 
   function renderReviews(reviews) {
     if (!reviews || reviews.length === 0) {
@@ -619,25 +913,6 @@ window.initHotelFunction = function initHotelFunction() {
 
     $("#reviewContainer").html(html);
   }
-
-  $(document).on("click", ".deleteBtn", function (e) {
-    e.stopPropagation(); // prevents modal open / card click
-
-    let id = $(this).data("delete-id");
-    DeleteHotel(id);
-
-    console.log(`delete trigger for: ${id}`);
-  });
-
-  $(document).on("click", ".deleteRoomBtn", function (e) {
-    e.stopPropagation(); // prevents modal open / card click
-
-    let id = $(this).data("delete-id");
-    let hotelID = $(this).data("hotel-id");
-    DeleteRoom(id, hotelID);
-
-    console.log(`delete trigger for: ${id}`);
-  });
 
   async function DeleteRoom(roomID, hotelID) {
     const response = await apiCall({
@@ -695,7 +970,6 @@ window.initHotelFunction = function initHotelFunction() {
     clearInputs();
     closemodals();
     loadHotels();
-    console.log(response);
   }
 
   async function DeleteHotel(id) {

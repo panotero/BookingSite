@@ -20,20 +20,31 @@
 
                     <span
                         class="inline-flex items-center bg-paper text-olive-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                        Find Your Perfect Stay
+
                     </span>
 
-                    <h1 class="text-5xl lg:text-7xl font-bold text-olive-700 leading-tight">
-                        Discover Exceptional
-                        <span class="block text-olive-500">
-                            Hotels & Resorts
-                        </span>
+                    <h1 class="text-5xl lg:text-5xl font-bold text-olive-700 leading-tight">
+                        Exclusive of MY PalauSport guests!
                     </h1>
+                    <span class="text-3xl block text-olive-500">
+                        Discover Great Hotels & Resorts
+                    </span>
 
                     <p class="mt-6 text-gray-600 max-w-xl text-lg">
-                        Browse handpicked hotels, luxury resorts, beachfront escapes, and
-                        unique stays. Compare prices, check availability, and book your next
-                        unforgettable getaway with confidence.
+                        Enjoy complimentary hotel booking assistance when you reserve
+                        your hotel stay at any of these carefully selected hotel in Puerto
+                        Princesa through MY PalauSport.
+
+                        As our valued guest for the upcoming Tubbataha 2027 liveaboard
+                        expedition, you'll have access to exclusive dicounted hotel rates
+                        available through our booking service.
+
+                        This personalized service is provided completely free of charge,
+                        ensuring your experience with us is nothing less than seamless,
+                        stress-free and professionally managed-- from the moment you
+                        arrive at Puerto Princesa until you depart to head back home,
+                        we will take care of you.
+
                     </p>
 
                     <!-- Search Form -->
@@ -125,13 +136,13 @@
                 <!-- Right -->
                 <div class="relative">
 
-                    <div class="absolute -top-6 -left-6 w-32 h-32 bg-paper rounded-full opacity-70">
+                    <div class="absolute -top-6 -left-6 w-32 h-32 bg-blue-700/50 rounded-full opacity-70">
                     </div>
 
-                    <div class="absolute -bottom-6 -right-6 w-40 h-40 bg-olive-200 rounded-full opacity-60">
+                    <div class="absolute -bottom-6 -right-6 w-40 h-40 bg-blue-200 rounded-full opacity-60">
                     </div>
 
-                    <img src="/images/hoteel2.jpeg"
+                    <img src="/images/MYPSLOGO.png"
                         class="relative rounded-[32px] shadow-xl w-full h-[500px] object-cover">
 
                 </div>
@@ -142,23 +153,23 @@
 
     </section>
     <!-- Featured Hotels -->
-    <section class="py-24 bg-paper">
+    <section class="py-24  bg-olive-500">
 
         <div class="max-w-7xl mx-auto px-6">
 
             <!-- Section Header -->
-            <div class="text-center mb-20">
+            <div class="text-center mb-20 text-white">
 
                 <span
                     class="inline-flex items-center bg-olive-100 text-olive-700 px-4 py-2 rounded-full text-sm font-medium">
-                    Featured Collection
+                    Featured Hotels
                 </span>
 
-                <h2 class="mt-6 text-4xl lg:text-6xl font-bold text-olive-700">
-                    Handpicked Hotels
+                <h2 class="mt-6 text-4xl lg:text-6xl font-bold">
+                    Accredited Hotels
                 </h2>
 
-                <p class="mt-6 max-w-2xl mx-auto text-gray-600 text-lg">
+                <p class="mt-6 max-w-2xl mx-auto  text-lg">
                     Discover exceptional stays selected for their location,
                     comfort, hospitality, and unforgettable guest experiences.
                 </p>
@@ -166,7 +177,7 @@
             </div>
 
             <!-- Hotels Inject Here -->
-            <div id="featured-hotels" class="space-y-32">
+            <div id="featured-hotels" class="space-y-5">
             </div>
 
             <!-- View All -->
@@ -325,20 +336,7 @@
 
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-dark_bg text-white py-12 mt-12 border-t border-white/10">
-        <div class="max-w-screen-xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-            <div class="mb-4 md:mb-0 text-center md:text-left">
-                <h5 class="font-bold text-xl tracking-wide">LUXESTAY</h5>
-                <p class="text-olive-400 text-sm mt-1">© 2026 All rights reserved.</p>
-            </div>
-            <div class="flex space-x-6 text-sm text-olive-200">
-                <a href="#" class="hover:text-white transition">Privacy</a>
-                <a href="#" class="hover:text-white transition">Terms</a>
-            </div>
-        </div>
-    </footer>
-
+    <x-footer />
 
     <script>
         $('#menu-btn').on('click', function() {
@@ -359,26 +357,40 @@
             }
             renderHotels(5);
 
-            function getStartingPrice(hotel) {
-                let lowestPrice = null;
+            function getStartingPrices(hotel) {
+
+                let lowestOriginal = null;
+                let lowestDiscounted = null;
 
                 hotel.rooms.forEach(room => {
                     room.prices.forEach(priceData => {
 
-                        let price = parseFloat(
-                            priceData.discounted_price &&
-                            parseFloat(priceData.discounted_price) > 0 ?
-                            priceData.discounted_price :
-                            priceData.price
-                        );
+                        const original = parseFloat(priceData.price);
 
-                        if (lowestPrice === null || price < lowestPrice) {
-                            lowestPrice = price;
+                        const discounted = priceData.discounted_price ?
+                            parseFloat(priceData.discounted_price) :
+                            null;
+
+                        // lowest original
+                        if (!isNaN(original)) {
+                            if (lowestOriginal === null || original < lowestOriginal) {
+                                lowestOriginal = original;
+                            }
+                        }
+
+                        // lowest discounted (only valid values)
+                        if (!isNaN(discounted) && discounted !== null) {
+                            if (lowestDiscounted === null || discounted < lowestDiscounted) {
+                                lowestDiscounted = discounted;
+                            }
                         }
                     });
                 });
 
-                return lowestPrice;
+                return {
+                    original: lowestOriginal,
+                    discounted: lowestDiscounted
+                };
             }
 
             function renderSlides(photos, hotelName) {
@@ -394,103 +406,117 @@
                 const hotelContainer = document.getElementById("featured-hotels");
                 const hotels = await getHotels();
                 const featured = hotels.data.slice(0, count);
+                console.log(hotels);
 
                 hotelContainer.innerHTML = "";
-
                 featured.forEach((hotel, index) => {
 
                     const photos = hotel.photos?.length ?
                         hotel.photos : ['/images/no-image.jpg'];
 
-                    const startingPrice = getStartingPrice(hotel);
+                    const startingPrice = getStartingPrices(hotel);
 
-                    const imageSection = `
-<div class="hotel-image">
-    <div class="swiper hotel-swiper-${hotel.id} rounded-2xl lg:rounded-xl overflow-hidden shadow-xl">
-        <div class="swiper-wrapper">
-            ${renderSlides(photos, hotel.name)}
+                    const layout = `
+<div class="w-full ">
+
+    <div class="w-full mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+        <div class="flex flex-col items-center text-center p-8 gap-6">
+
+            <!-- Logo -->
+            <img src="${hotel.logo}" alt="LOGO" class="w-24 h-auto">
+
+            <!-- Hotel Info -->
+            <div class="space-y-3">
+                <h1 class="text-5xl font-light text-zinc-800">
+                    ${hotel.name}
+                </h1>
+
+                <p class="text-zinc-500">
+                    ${hotel.city}, ${hotel.province}
+                </p>
+
+                <p class="text-zinc-500 leading-relaxed">
+                    ${hotel.description ?? 'Experience comfort and luxury with exclusive member pricing and premium accommodations.'}
+                </p>
+            </div>
+
+            <!-- Divider -->
+            <div class="w-24 h-px bg-zinc-200"></div>
+
+            <!-- Price Section -->
+            <div class="space-y-4">
+
+                <div>
+                    <p class="text-sm uppercase tracking-widest text-zinc-400">
+                        Original Starting Price
+                    </p>
+
+                    <p class="text-xl text-zinc-500 line-through">
+                        ${startingPrice ? '₱' + Number(startingPrice.original).toLocaleString() : 'Contact Us'}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm uppercase tracking-widest text-olive-600">
+                        MYPS Exclusive Starting Price
+                    </p>
+
+                    <p class="text-6xl font-bold text-olive-700">
+                        ${startingPrice ? '₱' + Number(startingPrice.discounted).toLocaleString() : 'Contact Us'}
+                    </p>
+
+                    <span class="inline-block mt-3 bg-red-100 text-red-600 px-4 py-1 rounded-full text-sm font-semibold">
+                        Save 31%
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- Book Button -->
+            <a href="/hotel?id=${hotel.id}"
+                class="py-5 px-10 rounded-lg bg-olive-600 hover:bg-olive-700 text-white font-semibold transition duration-300">
+                Book Now
+            </a>
+
+            <!-- Swiper -->
+            <div class="hotel-image relative w-full">
+
+                <div class="swiper hotel-swiper-${hotel.id} w-full rounded-2xl lg:rounded-xl overflow-hidden shadow-xl">
+
+                    <div class="swiper-wrapper w-full">
+                        ${renderSlides(photos, hotel.name)}
+                    </div>
+
+                    <div class="swiper-pagination"></div>
+                </div>
+
+                <!-- Prev -->
+                <button class="hotel-prev-${hotel.id} absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <!-- Next -->
+                <button class="hotel-next-${hotel.id} absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+            </div>
+
         </div>
-        <div class="swiper-pagination"></div>
+
     </div>
+
 </div>
 `;
-
-
-                    const contentSection = `
-                <div class="hotel-content h-full flex flex-col justify-between">
-
-                    <div class="flex items-center gap-2 mb-4">
-
-                        <div class="text-yellow-500 text-xl">★★★★★</div>
-
-                        <span class="text-gray-500">
-                            ${hotel.reviews?.length ?? 0} Reviews
-                        </span>
-
-                    </div>
-                    <div>
-
-                    <h3 class="text-4xl font-bold text-olive-700">
-                        ${hotel.name}
-                    </h3>
-
-                    <p class="text-gray-500 mt-2">
-                        ${hotel.city}, ${hotel.province}
-                    </p>
-
-
-                    <p class="mt-6 text-gray-600 leading-relaxed">
-                        ${hotel.description}
-                    </p>
-                    </div>
-
-                    <blockquote class="mt-8 border-l-4 border-olive-500 pl-6 italic text-gray-600">
-                        ${
-                            hotel.reviews?.length
-                                ? `"${hotel.reviews[0].review}"`
-                                : `"A carefully selected hotel offering comfort and quality stay experience."`
-                        }
-                    </blockquote>
-
-                    <div class="w-full md:flex lg:justify-between items-end gap-6 mt-8">
-
-                        <div>
-                            <p class="text-sm text-gray-500">Starting From</p>
-
-                            <h4 class="text-5xl font-bold text-olive-700">
-                                ${
-                                    startingPrice
-                                        ? '₱' + Number(startingPrice).toLocaleString()
-                                        : 'Contact Us'
-                                }
-                            </h4>
-                        </div>
-                        <div class="md: bg-olive-600 px-8 py-4 bg-olive-500 hover:bg-olive-600 text-white rounded-xl font-semibold transition max-md:mx-auto mt-5 max-md:text-center">
-                        <a href="/hotel?id=${hotel.id}"
-                            class="w-full h-full">
-                            Book Now
-                        </a>
-                        </div>
-
-                    </div>
-
-                </div>
-            `;
-
-
-                    const layout = index % 2 === 0 ?
-                        `
-                    <article class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center bg-white rounded-3xl drop-shadow-lg p-5">
-                        ${imageSection}
-                        ${contentSection}
-                    </article>
-                ` :
-                        `
-                    <article class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center bg-white rounded-3xl drop-shadow-lg p-5">
-                        <div class="order-2 lg:order-1 h-full">${contentSection}</div>
-                        <div class="order-1 lg:order-2 h-full">${imageSection}</div>
-                    </article>
-                `;
 
                     hotelContainer.innerHTML += layout;
 

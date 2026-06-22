@@ -30,6 +30,7 @@ Route::get('/', function () {
 });
 Route::get('/home', [HotelController::class, 'home']);
 Route::get('/hotel', [HotelController::class, 'hotel']);
+Route::get('/hotels', [HotelController::class, 'hotels']);
 
 
 Route::middleware(['auth', 'check.status', 'prevent-back-history'])->group(function () {

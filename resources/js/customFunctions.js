@@ -50,35 +50,43 @@ function checkopenmodal() {
   return openmodalcount;
 }
 
-window.closemodals = function closemodals() {
-  const opennedmodal = document.querySelectorAll(".modal");
+window.closemodals = function closemodals(modalId = null) {
+  // Helper function to reset and close a modal
+  const closeModal = (mdl) => {
+    if (!mdl || mdl.classList.contains("hidden")) return;
 
-  opennedmodal.forEach((mdl) => {
-    if (!mdl.classList.contains("hidden")) {
-      // RESET FORM ELEMENTS
-      const forms = mdl.querySelectorAll("form");
-      forms.forEach((form) => form.reset());
+    // RESET FORM ELEMENTS
+    const forms = mdl.querySelectorAll("form");
+    forms.forEach((form) => form.reset());
 
-      // RESET INPUTS NOT INSIDE FORM (fallback)
-      const inputs = mdl.querySelectorAll("input, textarea, select");
+    // RESET INPUTS NOT INSIDE FORM (fallback)
+    const inputs = mdl.querySelectorAll("input, textarea, select");
 
-      inputs.forEach((input) => {
-        if (input.type === "checkbox" || input.type === "radio") {
-          input.checked = false;
-        } else if (input.type !== "hidden") {
-          input.value = "";
-        }
-      });
+    inputs.forEach((input) => {
+      if (input.type === "checkbox" || input.type === "radio") {
+        input.checked = false;
+      } else if (input.type !== "hidden") {
+        input.value = "";
+      }
+    });
 
-      // OPTIONAL: reset custom UI (like your shipper/consignee display)
-      mdl.querySelectorAll("[data-shipper], [data-consignee]").forEach((el) => {
-        el.textContent = "—";
-      });
+    // OPTIONAL: reset custom UI
+    mdl.querySelectorAll("[data-shipper], [data-consignee]").forEach((el) => {
+      el.textContent = "—";
+    });
 
-      // HIDE MODAL
-      mdl.classList.add("hidden");
-    }
-  });
+    // HIDE MODAL
+    mdl.classList.add("hidden");
+  };
+
+  // Close specific modal
+  if (modalId) {
+    closeModal(document.getElementById(modalId));
+    return;
+  }
+
+  // Close all open modals
+  document.querySelectorAll(".modal:not(.hidden)").forEach(closeModal);
 };
 
 window.renderRows = function renderRows(
@@ -162,5 +170,73 @@ window.clearInputs = function clearInputs() {
   document.querySelectorAll("select").forEach((input) => {
     if (input.hasAttribute("disabled")) return;
     input.value = "";
+  });
+};
+
+window.renderPhotoGallery = function renderPhotoGallery({
+  container,
+  photos = [],
+  modelId,
+  deleteUrl,
+  onDeleteSuccess,
+}) {
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  // =========================
+  // Render HTML
+  // =========================
+  const html = photos
+    .map(
+      (
+        photo,
+      ) => `<div class="relative w-full aspect-square border rounded-xl overflow-hidden shadow-sm cursor-pointer">
+
+    <button
+        class="deleteRoomPhotoBtn absolute top-1 right-1 bg-red-500 text-white px-1.5 py-0.5 text-[10px] rounded-md"
+        data-delete-photo="${photo}"
+        data-model-id="${modelId}"
+    >
+        ✕
+    </button>
+
+    <img
+        src="${photo}"
+        class="w-full h-full object-cover"
+    >
+
+</div>
+    `,
+    )
+    .join("");
+
+  container.innerHTML = html;
+
+  // =========================
+  // Bind delete events
+  // =========================
+  container.querySelectorAll(".deleteRoomPhotoBtn").forEach((btn) => {
+    btn.addEventListener("click", async function (e) {
+      e.stopPropagation();
+
+      const payload = {
+        roomID: this.dataset.modelId,
+        photo: this.dataset.deletePhoto,
+      };
+
+      await apiCall({
+        mode: "DELETE",
+        isJson: true,
+        payload,
+        url: deleteUrl,
+        button: btn,
+      });
+
+      // callback after delete
+      if (typeof onDeleteSuccess === "function") {
+        onDeleteSuccess();
+      }
+    });
   });
 };
